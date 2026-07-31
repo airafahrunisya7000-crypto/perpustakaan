@@ -1,0 +1,111 @@
+<html>
+        <head><title>Downloaded HTML</title></head>
+        <body>
+            <pre style="white-space: pre-wrap; word-wrap: break-word;">import mysql.connector
+from datetime import datetime
+
+# === KONEKSI DATABASE ===
+db = mysql.connector.connect(
+    host="localhost",
+    user="root",
+    password="", # ganti password mysql kamu
+    database="perpus_xii_rpl1"
+)
+cursor = db.cursor()
+
+# === BUAT DATABASE & TABEL OTOMATIS ===
+cursor.execute("CREATE DATABASE IF NOT EXISTS perpus_xii_rpl1")
+cursor.execute("USE perpus_xii_rpl1")
+
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS buku (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    judul VARCHAR(100),
+    penulis VARCHAR(100),
+    kategori VARCHAR(50),
+    tahun_terbit INT,
+    stok INT,
+    tanggal_input DATETIME DEFAULT CURRENT_TIMESTAMP
+)
+""")
+db.commit()
+
+def header():
+    print("\n" + "="*40)
+    print(" PERPUSTAKAAN DIGITAL XII RPL 1")
+    print("="*40)
+
+def tampilkan_buku():
+    cursor.execute("SELECT * FROM buku ORDER BY id DESC")
+    hasil = cursor.fetchall()
+    header()
+    if not hasil:
+        print("Data buku masih kosong")
+    else:
+        for row in hasil:
+            print(f"[{row[0]}] {row[1]}")
+            print(f" Penulis: {row[2]} | Kategori: {row[3]}")
+            print(f" Tahun: {row[4]} | Stok: {row[5]} | Input: {row[6].strftime('%d-%m-%Y')}")
+            print("-"*40)
+
+def tambah_buku():
+    header()
+    print("=== TAMBAH BUKU BARU ===")
+    judul = input("Judul Buku: ")
+    penulis = input("Penulis: ")
+    kategori = input("Kategori [Novel/Pelajaran/Komik]: ")
+    tahun = int(input("Tahun Terbit: "))
+    stok = int(input("Stok: "))
+
+    sql = "INSERT INTO buku (judul, penulis, kategori, tahun_terbit, stok) VALUES (%s, %s, %s, %s, %s)"
+    val = (judul, penulis, kategori, tahun, stok)
+    cursor.execute(sql, val)
+    db.commit()
+    print("✅ Buku berhasil ditambahkan ke Perpustakaan XII RPL 1!")
+
+def update_buku():
+    tampilkan_buku()
+    print("\n=== UPDATE STOK BUKU ===")
+    id_buku = int(input("Masukkan ID buku: "))
+    stok_baru = int(input("Masukkan stok baru: "))
+
+    sql = "UPDATE buku SET stok = %s WHERE id = %s"
+    val = (stok_baru, id_buku)
+    cursor.execute(sql, val)
+    db.commit()
+    print("✅ Stok berhasil diupdate!")
+
+def hapus_buku():
+    tampilkan_buku()
+    print("\n=== HAPUS BUKU ===")
+    id_buku = int(input("Masukkan ID buku yang mau dihapus: "))
+    sql = "DELETE FROM buku WHERE id = %s"
+    cursor.execute(sql, (id_buku,))
+    db.commit()
+    print("✅ Buku berhasil dihapus!")
+
+def menu():
+    while True:
+        header()
+        print("1. Lihat Semua Buku [SELECT]")
+        print("2. Tambah Buku [INSERT]")
+        print("3. Update Stok Buku [UPDATE]")
+        print("4. Hapus Buku [DELETE]")
+        print("5. Keluar")
+
+        pilih = input("Pilih Menu: ")
+
+        if pilih == "1": tampilkan_buku()
+        elif pilih == "2": tambah_buku()
+        elif pilih == "3": update_buku()
+        elif pilih == "4": hapus_buku()
+        elif pilih == "5":
+            print("Terima kasih sudah pakai Perpustakaan Digital XII RPL 1")
+            break
+        else: print("Menu tidak ada!")
+
+if __name__ == "__main__":
+    menu()
+    db.close()</pre>
+        </body>
+    </html>
